@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CppMastery - Interactive C++ & DSA Learning Platform</title>
+  <meta name="description" content="Learn C++ from beginner to advanced DSA. Interactive lessons in Hinglish, live C++ online compiler, progressive hints, and step-by-step dry runs.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .search-result-item {
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      margin-bottom: 4px;
+    }
+    .search-result-item:hover {
+      background: var(--bg-surface-elevated);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Global Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <button id="sidebarToggleBtn" class="btn-icon" title="Toggle Syllabus (Distraction-Free Mode)" aria-label="Toggle Syllabus">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="9" y1="3" x2="9" y2="21"></line>
+          </svg>
+        </button>
+        <div class="brand-logo" onclick="App.switchView('dashboard')">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-cyan);">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+          <span class="brand-name">CppMastery</span>
+          <span class="brand-badge">C++20</span>
+        </div>
+
+        <nav class="nav-pills" style="margin-left: 12px;">
+          <button class="nav-pill-btn active" data-view="dashboard">Dashboard</button>
+          <button class="nav-pill-btn" data-view="learn">Curriculum</button>
+          <button class="nav-pill-btn" data-view="questions">Question Bank</button>
+          <button class="nav-pill-btn" data-view="compiler">Compiler Playground</button>
+          <button class="nav-pill-btn" data-view="revision">Revision Hub</button>
+        </nav>
+      </div>
+
+      <div class="header-right">
+        <!-- Search Trigger -->
+        <button id="globalSearchTrigger" class="search-trigger-btn">
+          <span>🔍</span>
+          <span>Search lessons, problems...</span>
+          <span class="search-shortcut-kbd">Ctrl K</span>
+        </button>
+
+        <!-- Stats & Gamification Badges -->
+        <div id="headerLevelBadge" class="header-level-pill">⚡ Lvl 1 Novice</div>
+        <div id="headerXpCounter" class="header-stat xp">✨ 0 XP</div>
+        <div id="headerStreakCounter" class="header-stat streak">🔥 1d Streak</div>
+        <div id="headerSolvedCounter" class="header-stat solved">🎯 0 Solved</div>
+
+        <!-- Settings Button -->
+        <button id="settingsTriggerBtn" class="btn-icon" title="Compiler & Account Settings">
+          ⚙️
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace with Sidebar -->
+    <div class="main-wrapper">
+      <!-- Left Sidebar: Complete 16 Chapters Syllabus -->
+      <aside id="appSidebar" class="app-sidebar">
+        <div class="sidebar-header">
+          <span class="sidebar-title">Syllabus Explorer</span>
+          <span id="sidebarProgressChip" class="syllabus-progress-chip">0/16 Done</span>
+        </div>
+        <div id="sidebarChapterList" class="chapter-accordion-list">
+          <!-- Dynamically populated by App.renderSidebar() -->
+        </div>
+      </aside>
+
+      <!-- Main Content Dynamic Panels -->
+      <main class="app-content">
+
+        <!-- VIEW 1: Dashboard -->
+        <div id="view-dashboard" class="view-panel active">
+          <div class="dashboard-hero">
+            <div>
+              <h1 class="hero-title">Welcome to CppMastery 🚀</h1>
+              <p class="hero-subtitle">
+                Master C++ from ground zero to advanced Data Structures & Algorithms. 
+                Detailed Hinglish explanations, line-by-line dry runs, and a fully functional GCC online compiler.
+              </p>
+            </div>
+            <div>
+              <button id="dashContinueBtn" class="btn btn-primary" style="padding: 12px 24px; font-size: 0.95rem;">
+                Continue Learning &rarr;
+              </button>
+            </div>
+          </div>
+
+          <!-- KPI Stats Grid -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <span class="stat-card-title">Completed Lessons <span>📖</span></span>
+              <span id="dashStatLessons" class="stat-card-val">0 / 72</span>
+              <span class="stat-card-sub">Curriculum coverage</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-card-title">Problems Solved <span>🎯</span></span>
+              <span id="dashStatSolved" class="stat-card-val">0 / 50</span>
+              <span class="stat-card-sub">Verified test cases</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-card-title">Submission Accuracy <span>⚡</span></span>
+              <span id="dashStatAccuracy" class="stat-card-val">0%</span>
+              <span class="stat-card-sub">First-pass success rate</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-card-title">Daily Streak <span>🔥</span></span>
+              <span id="dashStatStreak" class="stat-card-val">1 Day</span>
+              <span class="stat-card-sub">Keep coding every day</span>
+            </div>
+          </div>
+
+          <!-- 16 Chapters Grid -->
+          <div class="section-heading">
+            <span>Syllabus Modules (16 Chapters)</span>
+            <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: normal;">Structured progression from beginner to interview-ready</span>
+          </div>
+          <div id="dashChaptersGrid" class="chapters-grid">
+            <!-- Dynamically populated by App.renderDashboard() -->
+          </div>
+        </div>
+
+        <!-- VIEW 2: Learn / Lesson Reader -->
+        <div id="view-learn" class="view-panel">
+          <div class="lesson-layout-grid">
+            <!-- Center Column: Main Interactive Content -->
+            <div class="lesson-center-col">
+              <div id="lessonBreadcrumbs" class="lesson-breadcrumbs">
+                <!-- Breadcrumbs populated dynamically -->
+              </div>
+
+              <div class="lesson-header">
+                <h1 id="lessonReaderTitle" class="lesson-title">Lesson Title</h1>
+                <div class="lesson-meta-bar">
+                  <div style="display: flex; gap: 8px;">
+                    <button id="lessonMarkDoneBtn" class="btn btn-secondary">Mark as Completed</button>
+                    <button id="lessonBookmarkBtn" class="btn btn-secondary">☆ Bookmark</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tabbed Sequential Navigation inside Lesson -->
+              <div class="lesson-tabs">
+                <button class="lesson-tab-btn active" data-tab="concept">1. 📖 Concept & Why</button>
+                <button class="lesson-tab-btn" data-tab="visualizer">2. 🎬 RAM & Visualizer</button>
+                <button class="lesson-tab-btn" data-tab="code">3. 💻 Code Walkthrough</button>
+                <button class="lesson-tab-btn" data-tab="predict">4. 🔮 Predict Output</button>
+                <button class="lesson-tab-btn" data-tab="quiz">5. ❓ Topic Quiz</button>
+                <button class="lesson-tab-btn" data-tab="practice">6. 🎯 Practice Challenges</button>
+              </div>
+
+              <!-- Tab 1: Concept -->
+              <div id="lessonTab-concept" class="lesson-tab-content active"></div>
+
+              <!-- Tab 2: Visualizer & State Machine -->
+              <div id="lessonTab-visualizer" class="lesson-tab-content"></div>
+
+              <!-- Tab 3: Code Walkthrough -->
+              <div id="lessonTab-code" class="lesson-tab-content"></div>
+
+              <!-- Tab 4: Predict Output Challenges -->
+              <div id="lessonTab-predict" class="lesson-tab-content"></div>
+
+              <!-- Tab 5: Knowledge Check Quiz -->
+              <div id="lessonTab-quiz" class="lesson-tab-content"></div>
+
+              <!-- Tab 6: Related Practice -->
+              <div id="lessonTab-practice" class="lesson-tab-content"></div>
+
+              <!-- Lesson Navigation Footer -->
+              <div id="lessonNavFooter" class="lesson-nav-footer"></div>
+            </div>
+
+            <!-- Right Sticky Rail: Quick Jump, Mastery & Concept Pills -->
+            <aside class="lesson-right-rail">
+              <div class="rail-card">
+                <div class="rail-card-title">
+                  <span>Topic Mastery</span>
+                  <span id="railQuizStatusBadge" style="font-size: 0.75rem; font-weight: 700; color: var(--accent-emerald);"></span>
+                </div>
+                <div id="railProgressInfo" style="font-size: 0.825rem; color: var(--text-secondary); margin-bottom: 8px;">
+                  Status: <strong id="railLessonStatusText" style="color: var(--text-primary);">Not completed</strong>
+                </div>
+                <div id="railQuizScoreText" style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+                  Quiz Score: <span>Not attempted yet</span>
+                </div>
+                <button class="btn btn-primary" style="width: 100%; font-size: 0.8rem; padding: 6px;" onclick="App.openInCompiler('// Scratchpad for practice\n#include <iostream>\n\nint main() {\n    std::cout << \"Hello from scratchpad!\" << std::endl;\n    return 0;\n}')">
+                  Open Scratchpad ⚡
+                </button>
+              </div>
+
+              <div class="rail-card">
+                <div class="rail-card-title">Quick Jump</div>
+                <div class="rail-toc-list">
+                  <a href="#" class="rail-toc-link" onclick="App.switchLessonTab('concept'); return false;">💡 1. Concept & Theory</a>
+                  <a href="#" class="rail-toc-link" onclick="App.switchLessonTab('visualizer'); return false;">🎬 2. RAM & Visualizer</a>
+                  <a href="#" class="rail-toc-link" onclick="App.switchLessonTab('code'); return false;">💻 3. Code Walkthroughs</a>
+                  <a href="#" class="rail-toc-link" onclick="App.switchLessonTab('predict'); return false;">🔮 4. Predict Output</a>
+                  <a href="#" class="rail-toc-link" onclick="App.switchLessonTab('quiz'); return false;">❓ 5. Topic Quiz</a>
+                  <a href="#" class="rail-toc-link" onclick="App.switchLessonTab('practice'); return false;">🎯 6. Practice Challenges</a>
+                </div>
+              </div>
+
+              <div class="rail-card">
+                <div class="rail-card-title">Core Concepts</div>
+                <div id="railConceptTags" class="concept-tag-cloud">
+                  <span class="concept-tag">#C++20</span>
+                  <span class="concept-tag">#Memory</span>
+                  <span class="concept-tag">#Performance</span>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+
+        <!-- VIEW 3: Practice Problem Workspace (Split IDE) -->
+        <div id="view-practice" class="view-panel" style="padding: 0; max-width: 100%;">
+          <div class="practice-workspace">
+            <!-- Left Pane: Problem Description -->
+            <div class="workspace-left-pane">
+              <div class="problem-header">
+                <div class="problem-title-row">
+                  <h2 id="workspaceProblemTitle" class="problem-title">Problem Title</h2>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span id="workspaceProblemDifficulty" class="difficulty-badge easy">Easy</span>
+                    <button id="workspaceBookmarkBtn" class="btn btn-secondary" style="font-size: 0.75rem; padding: 4px 10px;">☆ Bookmark</button>
+                  </div>
+                </div>
+              </div>
+
+              <div id="workspaceProblemStatement" class="problem-statement-text">
+                <!-- Statement, sample cases, progressive hints, algorithm, and solution -->
+              </div>
+            </div>
+
+            <!-- Right Pane: Real Online C++ IDE -->
+            <div class="workspace-right-pane">
+              <div class="editor-toolbar">
+                <div class="editor-actions-left">
+                  <span style="font-size: 0.775rem; font-weight: 600; color: var(--text-muted);">Compiler:</span>
+                  <select id="workspaceStandardSelect" class="standard-select">
+                    <option value="c++17">C++17 (GCC 10.2.0)</option>
+                    <option value="c++20">C++20 (GCC 10.2.0)</option>
+                  </select>
+                </div>
+                <div class="editor-actions-right">
+                  <button id="workspaceResetBtn" class="btn btn-secondary" style="font-size: 0.75rem; padding: 4px 10px;" title="Reset Starter Code">Reset</button>
+                  <button id="workspaceExplainBtn" class="btn btn-secondary" style="font-size: 0.8rem; padding: 6px 12px;" title="Explain this code line-by-line in Hinglish">Explain Code 💡</button>
+                  <button id="workspaceRunBtn" class="btn btn-secondary" style="font-size: 0.8rem; padding: 6px 14px;">Run Code (Custom Input)</button>
+                  <button id="workspaceSubmitBtn" class="btn btn-primary" style="font-size: 0.8rem; padding: 6px 16px;">Submit Code 🚀</button>
+                </div>
+              </div>
+
+              <!-- Main Code Editor Textarea with Synchronized Line Numbers -->
+              <div class="editor-main-container">
+                <div id="workspaceLineNumbers" class="line-numbers-col">1<br>2<br>3<br>4<br>5</div>
+                <textarea id="workspaceCodeEditor" class="code-editor-textarea" spellcheck="false" placeholder="// Write your C++ code here..."></textarea>
+              </div>
+
+              <!-- Bottom Console with Tabs -->
+              <div class="editor-bottom-console">
+                <div class="console-tabs">
+                  <button class="console-tab-btn active" data-tab="output">Console Output</button>
+                  <button class="console-tab-btn" data-tab="input">Custom Stdin Input</button>
+                  <button class="console-tab-btn" data-tab="tests">Test Case Results</button>
+                  <button class="console-tab-btn" data-tab="errors">Compiler Errors & Debugger</button>
+                  <button class="console-tab-btn" data-tab="explain">Code Explanation 💡</button>
+                </div>
+
+                <!-- Console Panels -->
+                <div id="consolePanel-output" class="console-content" style="display: block;">
+                  <div id="workspaceStdout" style="color: var(--text-muted);">
+                    Click "Run Code" or press <kbd>Ctrl+Enter</kbd> to compile and execute.
+                  </div>
+                </div>
+
+                <div id="consolePanel-input" class="console-content" style="display: none;">
+                  <textarea id="workspaceStdin" class="stdin-input-box" placeholder="Enter custom stdin inputs here (e.g. numbers, strings)..."></textarea>
+                </div>
+
+                <div id="consolePanel-tests" class="console-content" style="display: none;">
+                  <div id="workspaceTests" style="color: var(--text-muted);">
+                    Click "Submit Code" to run your program against sample and hidden test cases.
+                  </div>
+                </div>
+
+                <div id="consolePanel-errors" class="console-content" style="display: none;">
+                  <div id="workspaceErrors" style="color: var(--text-muted);">
+                    No compiler errors detected.
+                  </div>
+                </div>
+
+                <div id="consolePanel-explain" class="console-content" style="display: none;">
+                  <div id="workspaceExplanation" style="color: var(--text-muted);">
+                    Click "Explain Code 💡" above to generate a line-by-line Hinglish breakdown, time complexity, and logical walkthrough of your code.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW 4: Question Bank -->
+        <div id="view-questions" class="view-panel">
+          <div style="margin-bottom: 24px;">
+            <h1 style="font-size: 1.85rem; font-weight: 800; margin-bottom: 8px;">C++ Question Bank 📚</h1>
+            <p style="color: var(--text-secondary); font-size: 0.95rem;">
+              Topic-wise curated practice problems with test cases, progressive hints, dry-run tables, and Hinglish error explanations.
+            </p>
+          </div>
+
+          <!-- Daily Quest Hero Card -->
+          <div class="daily-challenge-hero">
+            <div>
+              <span class="ch-badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); margin-bottom: 8px; display: inline-block;">🔥 DAILY QUEST &bull; +100 XP</span>
+              <h3 style="font-size: 1.25rem; font-weight: 800; margin: 4px 0 6px; color: #f8fafc;">Optimized Prime Factorization & Sieve</h3>
+              <p style="font-size: 0.85rem; color: #cbd5e1; margin: 0;">Conquer O(sqrt(N)) trial division, identify prime boundary conditions, and earn the Algorithm Explorer badge.</p>
+            </div>
+            <button class="btn btn-primary" onclick="App.openQuestion('q-04-03')">Launch Quest 🚀</button>
+          </div>
+
+          <div class="filter-bar">
+            <input type="text" id="qSearchInput" class="search-filter-input" placeholder="Search by title, topic, or subtopic...">
+            <select id="qDiffFilter" class="filter-select">
+              <option value="ALL">All Difficulties</option>
+              <option value="BEGINNER">Beginner</option>
+              <option value="EASY">Easy</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="HARD">Hard</option>
+            </select>
+            <select id="qTypeFilter" class="filter-select">
+              <option value="ALL">All Problem Types</option>
+              <option value="coding">Coding Problem</option>
+              <option value="debugging">Debugging & Find Error</option>
+              <option value="output">Predict Output</option>
+              <option value="conceptual">Conceptual & MCQ</option>
+            </select>
+            <select id="qTopicFilter" class="filter-select">
+              <option value="ALL">All Topics</option>
+              <option value="Fundamentals">C++ Fundamentals</option>
+              <option value="Operators">Operators & Expressions</option>
+              <option value="Conditionals">Conditionals & Logic</option>
+              <option value="Loops">Loops & Iteration</option>
+              <option value="Pattern">Pattern Printing</option>
+              <option value="Arrays">Arrays & Sorting</option>
+              <option value="Strings">Strings & Characters</option>
+              <option value="Pointers">Pointers & Memory</option>
+              <option value="STL">Standard Template Library</option>
+              <option value="Structures">Data Structures</option>
+              <option value="Patterns">Problem-Solving Patterns</option>
+            </select>
+            <select id="qStatusFilter" class="filter-select">
+              <option value="ALL">All Status</option>
+              <option value="SOLVED">Solved</option>
+              <option value="UNSOLVED">Unsolved</option>
+            </select>
+          </div>
+
+          <div class="questions-table-wrap">
+            <table class="questions-table">
+              <thead>
+                <tr>
+                  <th style="width: 50px;">#</th>
+                  <th>Problem Title</th>
+                  <th style="width: 120px;">Difficulty</th>
+                  <th style="width: 240px;">Topic</th>
+                  <th style="width: 100px;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="questionsTableBody">
+                <!-- Dynamically populated by App.renderQuestionsList() -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- VIEW 5: Standalone Compiler Playground -->
+        <div id="view-compiler" class="view-panel">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div>
+              <h2 style="font-size: 1.5rem; font-weight: 800;">C++ Scratchpad & Compiler Playground ⚡</h2>
+              <p style="color: var(--text-secondary); font-size: 0.85rem;">Run any C++ code directly on a live Linux GCC container with full standard library support.</p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <select id="standaloneTemplateSelect" class="filter-select" style="padding: 6px 12px; font-size: 0.8rem;">
+                <option value="hello">Template: Hello World</option>
+                <option value="fastio">Template: Fast I/O Boilerplate</option>
+                <option value="vector">Template: STL Vector & Sorting</option>
+                <option value="class">Template: OOP Class & Object</option>
+              </select>
+              <button id="standaloneRunBtn" class="btn btn-primary">Run Code ⚡</button>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; height: 580px;">
+            <!-- Standalone Editor -->
+            <div class="editor-main-container" style="border: 1px solid var(--border-subtle); border-radius: var(--radius-md);">
+              <div id="standaloneLineNumbers" class="line-numbers-col">1</div>
+              <textarea id="standaloneCodeEditor" class="code-editor-textarea" spellcheck="false"></textarea>
+            </div>
+
+            <!-- Standalone I/O Panel -->
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <div style="flex: 1; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column;">
+                <div style="font-size: 0.775rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px;">Custom Input (stdin):</div>
+                <textarea id="standaloneStdin" class="stdin-input-box" placeholder="Enter input data here..." style="flex: 1;"></textarea>
+              </div>
+
+              <div style="flex: 1.5; background: #060910; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 12px; overflow-y: auto;">
+                <div style="font-size: 0.775rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px;">Execution Output:</div>
+                <div id="standaloneStdout" style="color: var(--text-muted); font-family: var(--font-mono); font-size: 0.8125rem;">
+                  Click "Run Code" to compile and run.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW 6: Revision Hub -->
+        <div id="view-revision" class="view-panel">
+          <div style="margin-bottom: 28px;">
+            <h1 style="font-size: 1.85rem; font-weight: 800; margin-bottom: 8px;">Revision Hub & Bookmarks 🧠</h1>
+            <p style="color: var(--text-secondary); font-size: 0.95rem;">
+              Review starred lessons, revisit bookmarked problems, and conquer coding questions you previously missed.
+            </p>
+          </div>
+
+          <!-- Section 1: Bookmarked Lessons -->
+          <div style="margin-bottom: 32px;">
+            <h3 style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+              <span>⭐ Bookmarked Lessons for Quick Revision</span>
+            </h3>
+            <div id="revisionBookmarkedLessons" style="display: flex; flex-direction: column; gap: 10px;">
+              <!-- Populated by App.renderRevisionView() -->
+            </div>
+          </div>
+
+          <!-- Section 2: Bookmarked Problems -->
+          <div style="margin-bottom: 32px;">
+            <h3 style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+              <span>🎯 Bookmarked Practice Questions</span>
+            </h3>
+            <div id="revisionBookmarkedQuestions" style="display: flex; flex-direction: column; gap: 10px;">
+              <!-- Populated by App.renderRevisionView() -->
+            </div>
+          </div>
+
+          <!-- Section 3: Failed / Incorrect Questions -->
+          <div style="margin-bottom: 32px;">
+            <h3 style="margin-bottom: 12px; color: var(--accent-rose); display: flex; align-items: center; gap: 8px;">
+              <span>⚠️ Queue for Revision (Unsolved / Failed Attempts)</span>
+            </h3>
+            <div id="revisionFailedAttempts" style="display: flex; flex-direction: column; gap: 10px;">
+              <!-- Populated by App.renderRevisionView() -->
+            </div>
+          </div>
+
+          <!-- Section 4: Topic Quizzes & Scores -->
+          <div>
+            <h3 style="margin-bottom: 12px; color: var(--accent-cyan); display: flex; align-items: center; gap: 8px;">
+              <span>📝 Topic Quizzes & Mastery Scores</span>
+            </h3>
+            <div id="revisionQuizScores" style="display: flex; flex-direction: column; gap: 10px;">
+              <!-- Populated by App.renderRevisionView() -->
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Global Search Modal (Ctrl+K) -->
+  <div id="searchModal" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <input type="text" id="globalSearchInput" class="search-filter-input" placeholder="Search lessons, topics, problems..." style="font-size: 1rem; border: none; background: transparent; padding: 4px;">
+        <button id="closeSearchBtn" class="btn-icon">✕</button>
+      </div>
+      <div id="globalSearchResults" class="modal-body">
+        <div style="color: var(--text-muted); padding: 16px; text-align: center;">Type a keyword to search syllabus and questions...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings & Compiler Modal -->
+  <div id="settingsModal" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Compiler & Platform Settings</h3>
+        <button onclick="App.closeSettingsModal()" class="btn-icon">✕</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 20px;">
+        <div>
+          <h4 style="margin-bottom: 6px;">Live C++ Execution Engine</h4>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 10px;">
+            The platform is pre-configured with the public Piston C++ compiler (Linux GCC 10.2.0) with zero API keys required. You can test live execution below:
+          </p>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <button id="settingsTestCompilerBtn" class="btn btn-secondary" style="font-size: 0.8rem;">Test Connection ⚡</button>
+            <div id="settingsCompilerTestResult" style="font-size: 0.8rem;"></div>
+          </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border-subtle);">
+
+        <div>
+          <h4 style="margin-bottom: 6px;">Progress Backup & Sync</h4>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 10px;">
+            Export all your completed lessons, solved questions, streaks, and code drafts to a JSON file or import back anytime.
+          </p>
+          <div style="display: flex; gap: 10px;">
+            <button id="settingsExportBtn" class="btn btn-secondary">Export Progress (JSON)</button>
+            <button id="settingsImportBtn" class="btn btn-secondary">Import Progress (JSON)</button>
+          </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border-subtle);">
+
+        <div>
+          <h4 style="margin-bottom: 6px; color: var(--accent-rose);">Reset Progress</h4>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 10px;">
+            Clear all bookmarks, solved problems, and reset streaks to start over.
+          </p>
+          <button id="settingsResetBtn" class="btn btn-secondary" style="color: var(--accent-rose); border-color: rgba(244, 63, 94, 0.4);">
+            Reset All Data
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="js/chaptersData.js"></script>
+  <script src="js/lessonsData.js"></script>
+  <script src="js/lessonsDataPart1Ext.js"></script>
+  <script src="js/lessonsDataPart2.js"></script>
+  <script src="js/lessonsDataPart3.js"></script>
+  <script src="js/lessonsDataPart4.js"></script>
+  <script src="js/questionsData.js"></script>
+  <script src="js/questionsDataPart2.js"></script>
+  <script src="js/questionsDataPart3.js"></script>
+  <script src="js/visualizers.js"></script>
+  <script src="js/compilerService.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

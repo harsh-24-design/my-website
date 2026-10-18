@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-canvas: #090d16;
+  --bg-sidebar: #060910;
+  --bg-surface: #0f1524;
+}
+
+body {
+  background-color: #090d16;
+  color: #f8fafc;
+}
